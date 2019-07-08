@@ -7,7 +7,6 @@
 # new environment variables
 
 # modified environment variables
-export CMAKE_PREFIX_PATH="/home/sai/Desktop/robot/simulation_ws/devel:$CMAKE_PREFIX_PATH"
-export PWD="/home/sai/Desktop/robot/simulation_ws/build"
-export ROSLISP_PACKAGE_DIRECTORIES="/home/sai/Desktop/robot/simulation_ws/devel/share/common-lisp"
-export ROS_PACKAGE_PATH="/home/sai/Desktop/robot/simulation_ws/src:$ROS_PACKAGE_PATH"
+export LD_LIBRARY_PATH="/opt/ros/kinetic/lib:/opt/ros/kinetic/lib/x86_64-linux-gnu"
+export PWD="/home/sai/Desktop/differential_drive_robot/simulation_ws/build"
+export ROS_PACKAGE_PATH="/home/sai/Desktop/differential_drive_robot/simulation_ws/src:/opt/ros/kinetic/share"

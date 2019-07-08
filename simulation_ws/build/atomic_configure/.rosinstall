@@ -1,2 +1,2 @@
 - setup-file:
-    local-name: /home/sai/Desktop/robot/simulation_ws/devel/setup.sh
+    local-name: /home/sai/Desktop/differential_drive_robot/simulation_ws/devel/setup.sh
