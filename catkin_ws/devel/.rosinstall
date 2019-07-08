@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/sai/Desktop/robot/catkin_ws/devel/setup.sh
