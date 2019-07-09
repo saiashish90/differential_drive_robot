@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 
-# import ros stuff
 import rospy
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist, Point
@@ -8,13 +7,19 @@ from nav_msgs.msg import Odometry
 from tf import transformations
 from std_srvs.srv import *
 import math
+import random
+
+#range_
+range_ = 1
+
+#explore grid size
+explore = [[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]]
 
 active_ = False
 
 # robot state variables
 position_ = Point()
 yaw_ = 0
-c = 0
 # machine state
 state_ = 0
 # goal
@@ -22,10 +27,14 @@ desired_position_ = Point()
 desired_position_.x = rospy.get_param('des_pos_x')
 desired_position_.y = rospy.get_param('des_pos_y')
 desired_position_.z = 0
-patrol = [desired_position_.x,desired_position_.y,
-        desired_position_.x,desired_position_.y*-1,
-        desired_position_.x*-1,desired_position_.y*-1,
-        desired_position_.x*-1,desired_position_.y]
+
+prev = Point()
+
+borders = []
+borders.append(Point())
+borders.append(Point())
+borders.append(Point())
+borders.append(Point())
 
 
 # parameters
@@ -61,6 +70,94 @@ def clbk_odom(msg):
     euler = transformations.euler_from_quaternion(quaternion)
     yaw_ = euler[2]
 
+def find_borders(des_position_):
+    global explore, borders, desired_position_
+    point = Point()
+    point.z = 0
+
+    #point1
+    point.x =des_position_.x-1
+    point.y =des_position_.y
+    if((point.x>=0 and point.y>=0)and (point.x<=4 and point.y<=4)):
+        borders[0].x = point.x
+        borders[0].y = point.y
+    else:
+        borders[0].x = -1
+        borders[0].y = -1
+
+    #point2
+    point.x =des_position_.x
+    point.y =des_position_.y+1
+    if((point.x>=0 and point.y>=0) and (point.x<=4 and point.y<=4)):
+        borders[1].x = point.x
+        borders[1].y = point.y
+
+    else:
+        borders[1].x = -1
+        borders[1].y = -1
+
+    #point3
+    point.x =des_position_.x+1
+    point.y =des_position_.y
+    if((point.x>=0 and point.y>=0)and (point.x<=4 and point.y<=4)):
+        borders[2].x = point.x
+        borders[2].y = point.y
+    else:
+        borders[2].x = -1
+        borders[2].y = -1
+
+    #point4
+    point.x =des_position_.x
+    point.y =des_position_.y-1
+    if((point.x>=0 and point.y>=0)and (point.x<=4 and point.y<=4)):
+        borders[3].x = point.x
+        borders[3].y = point.y
+    else:
+        borders[3].x = -1
+        borders[3].y = -1
+
+    #for i in range(0,len(borders)):
+        #print (borders[i].x),
+        #print (borders[i].y)
+
+def pick_random_point():
+    global borders, des_position_, explore
+    flag = 0
+    while(flag != -1):
+        a = random.choice([0,1,2,3])
+        if((borders[a].x>=0 and borders[a].y>=0) and explore[borders[a].x][borders[a].y] == 0):
+            desired_position_.x = borders[a].x
+            desired_position_.y = borders[a].y
+            flag = -1
+        else:
+            flag = flag + 1
+        if(flag == 15):
+            for i in range(len(explore)):
+                for j in range(len(explore[i])):
+                    if(explore[i][j] == 0):
+                        desired_position_.x = i
+                        desired_position_.y = j
+
+            flag = -1
+
+    #print desired_position_
+    for i in range(len(borders)):
+        if(borders[i].x>=0 and borders[i].y>=0):
+            set_point_one(borders[i])
+    #for i in range(len(explore)):
+        #for j in range(len(explore[i])):
+            #print(explore[i][j]),
+        #print
+
+def set_point_one(point):
+    global explore
+    explore[point.x][point.y] = 1
+    for i in range(len(explore)):
+        for j in range(len(explore[i])):
+            print(explore[i][j]),
+        print
+
+
 def change_state(state):
     global state_
     state_ = state
@@ -89,6 +186,7 @@ def fix_yaw(des_pos):
         print 'Yaw error: [%s]' % err_yaw
         change_state(1)
 
+
 def go_straight_ahead(des_pos):
     global yaw_, pub, yaw_precision_, state_
     desired_yaw = math.atan2(des_pos.y - position_.y, des_pos.x - position_.x)
@@ -109,17 +207,20 @@ def go_straight_ahead(des_pos):
         print 'Yaw error: [%s]' % err_yaw
         change_state(0)
 
-def done():
+def done_point():
+    global desired_position_
     twist_msg = Twist()
     twist_msg.linear.x = 0
     twist_msg.angular.z = 0
     pub.publish(twist_msg)
-    desired_position_.x = patrol[c%8]
-    desired_position_.y = patrol[c%8+1]
+    find_borders(desired_position_)
+    set_point_one(desired_position_)
+    pick_random_point()
     change_state(0)
 
 def main():
-    global pub, active_,c
+    global pub, active_
+    c = 0
 
     rospy.init_node('go_to_point')
 
@@ -139,10 +240,20 @@ def main():
             elif state_ == 1:
                 go_straight_ahead(desired_position_)
             elif state_ == 2:
-               done()
-               c = c+2
+               done_point()
             else:
                 rospy.logerr('Unknown state!')
+            c = 0
+            for i in range(len(explore)):
+                for j in range(len(explore[i])):
+                    if(explore[i][j] == 1):
+                        c = c + 1
+            if(c == 25):
+                twist_msg = Twist()
+                twist_msg.linear.x = 0
+                twist_msg.angular.z = 0
+                pub.publish(twist_msg)
+
 
         rate.sleep()
 
