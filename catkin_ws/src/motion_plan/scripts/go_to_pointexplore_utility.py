@@ -10,10 +10,10 @@ import math
 import random
 
 #range_
-range_ = 1
+range_ = 5
 
 #explore grid size
-explore = [[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]]
+explore = [[0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]]
 
 active_ = False
 
@@ -71,14 +71,14 @@ def clbk_odom(msg):
     yaw_ = euler[2]
 
 def find_borders(des_position_):
-    global explore, borders, desired_position_
+    global explore, borders, desired_position_, range_
     point = Point()
     point.z = 0
 
     #point1
-    point.x =des_position_.x-1
+    point.x =des_position_.x-range_
     point.y =des_position_.y
-    if((point.x>=0 and point.y>=0)and (point.x<=4 and point.y<=4)):
+    if((point.x>=0 and point.y>=0)and (point.x<=9 and point.y<=9)):
         borders[0].x = point.x
         borders[0].y = point.y
     else:
@@ -87,8 +87,8 @@ def find_borders(des_position_):
 
     #point2
     point.x =des_position_.x
-    point.y =des_position_.y+1
-    if((point.x>=0 and point.y>=0) and (point.x<=4 and point.y<=4)):
+    point.y =des_position_.y+range_
+    if((point.x>=0 and point.y>=0) and (point.x<=9 and point.y<=9)):
         borders[1].x = point.x
         borders[1].y = point.y
 
@@ -97,9 +97,9 @@ def find_borders(des_position_):
         borders[1].y = -1
 
     #point3
-    point.x =des_position_.x+1
+    point.x =des_position_.x+range_
     point.y =des_position_.y
-    if((point.x>=0 and point.y>=0)and (point.x<=4 and point.y<=4)):
+    if((point.x>=0 and point.y>=0)and (point.x<=9 and point.y<=9)):
         borders[2].x = point.x
         borders[2].y = point.y
     else:
@@ -108,8 +108,8 @@ def find_borders(des_position_):
 
     #point4
     point.x =des_position_.x
-    point.y =des_position_.y-1
-    if((point.x>=0 and point.y>=0)and (point.x<=4 and point.y<=4)):
+    point.y =des_position_.y-range_
+    if((point.x>=0 and point.y>=0)and (point.x<=9 and point.y<=9)):
         borders[3].x = point.x
         borders[3].y = point.y
     else:
@@ -122,21 +122,21 @@ def find_borders(des_position_):
 def utility_calc(des_position_):
     point = Point()
     u = 0
-    point.x =des_position_.x-1
+    point.x =des_position_.x-range_
     point.y =des_position_.y
-    if((point.x>=0 and point.y>=0) and (point.x<=4 and point.y<=4) and explore[point.x][point.y] == 0 ):
+    if((point.x>=0 and point.y>=0) and (point.x<=9 and point.y<=9) and explore[point.x][point.y] == 0 ):
         u= u+1
     point.x =des_position_.x
-    point.y =des_position_.y+1
-    if((point.x>=0 and point.y>=0) and (point.x<=4 and point.y<=4) and explore[point.x][point.y] == 0 ):
+    point.y =des_position_.y+range_
+    if((point.x>=0 and point.y>=0) and (point.x<=9 and point.y<=9) and explore[point.x][point.y] == 0 ):
         u= u+1
-    point.x =des_position_.x+1
+    point.x =des_position_.x+range_
     point.y =des_position_.y
-    if((point.x>=0 and point.y>=0) and (point.x<=4 and point.y<=4) and explore[point.x][point.y] == 0 ):
+    if((point.x>=0 and point.y>=0) and (point.x<=9 and point.y<=9) and explore[point.x][point.y] == 0 ):
         u= u+1
     point.x =des_position_.x
-    point.y =des_position_.y-1
-    if((point.x>=0 and point.y>=0) and (point.x<=4 and point.y<=4) and explore[point.x][point.y] == 0 ):
+    point.y =des_position_.y-range_
+    if((point.x>=0 and point.y>=0) and (point.x<=9 and point.y<=9) and explore[point.x][point.y] == 0 ):
         u= u+1
     return u
 
@@ -149,6 +149,9 @@ def find_max(util):
 
 def pick_random_point():
     global borders, des_position_, explore
+    curr_point = Point()
+    curr_point.x = desired_position_.x
+    curr_point.y = desired_position_.y
     flag = 0
     utility = []
     max = -1
@@ -175,16 +178,25 @@ def pick_random_point():
             for i in range(len(explore)):
                 for j in range(len(explore[i])):
                     if(explore[i][j] == 0):
-                        desired_position_.x = i
-                        desired_position_.y = j
+                        if(range_>=1 and range_<=3):
+                            desired_position_.x = i-(range_-1-1)
+                            desired_position_.y = j-(range_-1-1)
+                        elif(range_>=4 and range_<=7):
+                            desired_position_.x = i-(range_-2-1)
+                            desired_position_.y = j-(range_-2-1)
+                        elif(range_>=8 and range_<=10):
+                            desired_position_.x = i-(range_-3-1)
+                            desired_position_.y = j-(range_-3-1)
+                        if(desired_position_.x<0):
+                            desired_position_.x = 0
+                        if(desired_position_.y<0):
+                            desired_position_.y = 0
 
             flag = -1
 
     print desired_position_
 
-    for i in range(len(borders)):
-        if(borders[i].x>=0 and borders[i].y>=0):
-            set_point_one(borders[i])
+    set_all_points_one(curr_point)
 
     for i in range(len(explore)):
         for j in range(len(explore[i])):
@@ -195,6 +207,14 @@ def set_point_one(point):
     global explore
     explore[point.x][point.y] = 1
 
+def set_all_points_one(curr_point):
+    global explore, range_
+    for i in range(curr_point.x-range_,curr_point.x+range_):
+        for j in range(curr_point.y-range_,curr_point.y+range_):
+            if(((i-curr_point.x)*(i-curr_point.x) + (j-curr_point.y)*(j-curr_point.y) <= range_*range_) and (i<=9 and i>=0 and j<=9 and j>=0)):
+                explore[i][j] = 1
+            else:
+                continue
 
 def change_state(state):
     global state_
@@ -251,8 +271,8 @@ def done_point():
     twist_msg.linear.x = 0
     twist_msg.angular.z = 0
     pub.publish(twist_msg)
-    find_borders(desired_position_)
     set_point_one(desired_position_)
+    find_borders(desired_position_)
     pick_random_point()
     change_state(0)
 
@@ -286,7 +306,7 @@ def main():
                 for j in range(len(explore[i])):
                     if(explore[i][j] == 1):
                         c = c + 1
-            if(c == 25):
+            if(c == 100):
                 twist_msg = Twist()
                 twist_msg.linear.x = 0
                 twist_msg.angular.z = 0

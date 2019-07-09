@@ -116,7 +116,7 @@ def main():
             continue
 
         if state_ == 0:
-            if regions_['front'] > 0.5 and regions_['front'] < 1:
+            if regions_['front'] > 0.75 and regions_['front'] < 1:
                 change_state(1)
 
         elif state_ == 1:
