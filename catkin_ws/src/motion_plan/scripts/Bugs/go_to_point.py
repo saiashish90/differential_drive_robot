@@ -15,7 +15,7 @@ active_ = False
 # robot state variables
 position_ = Point()
 yaw_ = 0
-c = 0
+
 # machine state
 state_ = 0
 # goal
@@ -23,11 +23,6 @@ desired_position_ = Point()
 desired_position_.x = rospy.get_param('des_pos_x')
 desired_position_.y = rospy.get_param('des_pos_y')
 desired_position_.z = 0
-patrol = [desired_position_.x,desired_position_.y,
-        desired_position_.x,desired_position_.y*-1,
-        desired_position_.x*-1,desired_position_.y*-1,
-        desired_position_.x*-1,desired_position_.y]
-
 
 # parameters
 yaw_precision_ = math.pi / 90 # +/- 2 degree allowed
@@ -81,7 +76,7 @@ def fix_yaw(des_pos):
 
     twist_msg = Twist()
     if math.fabs(err_yaw) > yaw_precision_:
-        twist_msg.angular.z = -0.2 if err_yaw > 0 else 0.2
+        twist_msg.angular.z = 0.2 if err_yaw > 0 else -0.2
 
     pub.publish(twist_msg)
 
@@ -99,7 +94,7 @@ def go_straight_ahead(des_pos):
     if err_pos > dist_precision_:
         twist_msg = Twist()
         twist_msg.linear.x = 0.6
-        twist_msg.angular.z = -0.1 if err_yaw > 0 else 0.1
+        twist_msg.angular.z = 0.1 if err_yaw > 0 else -0.1
         pub.publish(twist_msg)
     else:
         print 'Position error: [%s]' % err_pos
@@ -115,12 +110,8 @@ def done():
     twist_msg.linear.x = 0
     twist_msg.angular.z = 0
     pub.publish(twist_msg)
-    #desired_position_.x = patrol[c%8]
-    #desired_position_.y = patrol[c%8+1]
-    #change_state(0)
-
 def main():
-    global pub, active_,c
+    global pub, active_
 
     rospy.init_node('go_to_point')
 
@@ -141,7 +132,7 @@ def main():
                 go_straight_ahead(desired_position_)
             elif state_ == 2:
                done()
-               #c = c+2
+               break
             else:
                 rospy.logerr('Unknown state!')
 

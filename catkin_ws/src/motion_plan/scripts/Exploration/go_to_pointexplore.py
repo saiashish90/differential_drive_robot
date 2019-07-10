@@ -253,6 +253,8 @@ def main():
                 twist_msg.linear.x = 0
                 twist_msg.angular.z = 0
                 pub.publish(twist_msg)
+                rospy.loginfo('done')
+                break
 
 
         rate.sleep()
