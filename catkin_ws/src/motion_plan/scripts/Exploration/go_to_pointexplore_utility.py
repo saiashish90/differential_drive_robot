@@ -281,10 +281,17 @@ def done_point():
     twist_msg.linear.x = 0
     twist_msg.angular.z = 0
     pub.publish(twist_msg)
+    do_a_spin()
     set_point_one(desired_position_)
     find_borders(desired_position_)
     pick_random_point()
     change_state(0)
+
+def do_a_spin():
+    for i in range(200000):
+        twist_msg = Twist()
+        twist_msg.angular.z = 1
+        pub.publish(twist_msg)
 
 def main():
     global pub, active_
