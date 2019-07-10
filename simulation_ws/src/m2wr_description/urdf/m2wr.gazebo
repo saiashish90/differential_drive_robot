@@ -74,6 +74,9 @@
             <near>0.01</near>
             <far>100</far>
           </clip>
+          <save enabled="true">
+            <path>/home/sai/Desktop/video</path>
+          </save>
         </camera>
 
         <plugin name="camera_camera_controller" filename="libgazebo_ros_camera.so">
