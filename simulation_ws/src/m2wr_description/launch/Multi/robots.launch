@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<launch>
+	<param name="robot_description" command="$(find xacro)/xacro --inorder '$(find m2wr_description)/urdf/m2wr.xacro'" />
+
+<!-- First robot -->
+<group ns="robot1">
+	<param name="tf_prefix" value="robot1_tf" />
+	<include file="$(find m2wr_description)/launch/Multi/one_spawn.launch">
+	<arg name="robot_name" value="Robot1" />
+	<arg name="init_pose" value="-x -1 -y 1 -z 0" />
+	</include>
+</group>
+
+<!-- Second robot -->
+<group ns="robot2">
+	<param name="tf_prefix" value="robot2_tf" />
+	<include file="$(find m2wr_description)/launch/Multi/one_spawn.launch">
+	<arg name="robot_name" value="Robot2" />
+	<arg name="init_pose" value="-x 1 -y 1 -z 0"/>
+	</include>
+</group>
+</launch>
