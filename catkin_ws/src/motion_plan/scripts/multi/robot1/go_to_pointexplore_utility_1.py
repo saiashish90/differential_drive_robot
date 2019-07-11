@@ -12,12 +12,13 @@ import random
 #range_
 range_ = 5
 grid_size = 10
+grid_sizey = 20
 
 #explore grid size
 explore = []
 for i in range(grid_size):
     temp = []
-    for j in range(grid_size):
+    for j in range(grid_sizey):
         temp.append(0)
     explore.append(temp)
 
@@ -45,7 +46,7 @@ borders.append(Point())
 
 # parameters
 yaw_precision_ = math.pi / 90 # +/- 2 degree allowed
-dist_precision_ = 0.3
+dist_precision_ = 3
 
 # publishers
 pub = None
@@ -84,7 +85,7 @@ def find_borders(des_position_):
     #point1
     point.x =des_position_.x-range_
     point.y =des_position_.y
-    if((point.x>=0 and point.y>=0)and (point.x<=grid_size-1 and point.y<=grid_size-1)):
+    if((point.x>=0 and point.y>=0)and (point.x<=grid_size-1 and point.y<=grid_sizey-1)):
         borders[0].x = point.x
         borders[0].y = point.y
     else:
@@ -94,7 +95,7 @@ def find_borders(des_position_):
     #point2
     point.x =des_position_.x
     point.y =des_position_.y+range_
-    if((point.x>=0 and point.y>=0)and (point.x<=grid_size-1 and point.y<=grid_size-1)):
+    if((point.x>=0 and point.y>=0)and (point.x<=grid_size-1 and point.y<=grid_sizey-1)):
         borders[1].x = point.x
         borders[1].y = point.y
 
@@ -105,7 +106,7 @@ def find_borders(des_position_):
     #point3
     point.x =des_position_.x+range_
     point.y =des_position_.y
-    if((point.x>=0 and point.y>=0)and (point.x<=grid_size-1 and point.y<=grid_size-1)):
+    if((point.x>=0 and point.y>=0)and (point.x<=grid_size-1 and point.y<=grid_sizey-1)):
         borders[2].x = point.x
         borders[2].y = point.y
     else:
@@ -115,7 +116,7 @@ def find_borders(des_position_):
     #point4
     point.x =des_position_.x
     point.y =des_position_.y-range_
-    if((point.x>=0 and point.y>=0)and (point.x<=grid_size-1 and point.y<=grid_size-1)):
+    if((point.x>=0 and point.y>=0)and (point.x<=grid_size-1 and point.y<=grid_sizey-1)):
         borders[3].x = point.x
         borders[3].y = point.y
     else:
@@ -130,19 +131,19 @@ def utility_calc(des_position_):
     u = 0
     point.x =des_position_.x-range_
     point.y =des_position_.y
-    if((point.x>=0 and point.y>=0) and (point.x<=grid_size-1 and point.y<=grid_size-1) and explore[point.x][point.y] == 0 ):
+    if((point.x>=0 and point.y>=0) and (point.x<=grid_size-1 and point.y<=grid_sizey-1) and explore[point.x][point.y] == 0 ):
         u= u+1
     point.x =des_position_.x
     point.y =des_position_.y+range_
-    if((point.x>=0 and point.y>=0) and (point.x<=grid_size-1 and point.y<=grid_size-1) and explore[point.x][point.y] == 0 ):
+    if((point.x>=0 and point.y>=0) and (point.x<=grid_size-1 and point.y<=grid_sizey-1) and explore[point.x][point.y] == 0 ):
         u= u+1
     point.x =des_position_.x+range_
     point.y =des_position_.y
-    if((point.x>=0 and point.y>=0) and (point.x<=grid_size-1 and point.y<=grid_size-1) and explore[point.x][point.y] == 0 ):
+    if((point.x>=0 and point.y>=0) and (point.x<=grid_size-1 and point.y<=grid_sizey-1) and explore[point.x][point.y] == 0 ):
         u= u+1
     point.x =des_position_.x
     point.y =des_position_.y-range_
-    if((point.x>=0 and point.y>=0) and (point.x<=grid_size-1 and point.y<=grid_size-1) and explore[point.x][point.y] == 0 ):
+    if((point.x>=0 and point.y>=0) and (point.x<=grid_size-1 and point.y<=grid_sizey-1) and explore[point.x][point.y] == 0 ):
         u= u+1
     return u
 
@@ -221,7 +222,7 @@ def set_all_points_one(curr_point):
     global explore, range_
     for i in range(curr_point.x-range_,curr_point.x+range_):
         for j in range(curr_point.y-range_,curr_point.y+range_):
-            if(((i-curr_point.x)*(i-curr_point.x) + (j-curr_point.y)*(j-curr_point.y) <= range_*range_) and (i<=grid_size-1 and i>=0 and j<=grid_size-1 and j>=0)):
+            if(((i-curr_point.x)*(i-curr_point.x) + (j-curr_point.y)*(j-curr_point.y) <= range_*range_) and (i<=grid_size-1 and i>=0 and j<=grid_sizey-1 and j>=0)):
                 explore[i][j] = 1
             else:
                 continue
@@ -323,7 +324,7 @@ def main():
                 for j in range(len(explore[i])):
                     if(explore[i][j] == 1):
                         c = c + 1
-            if(c == grid_size**2):
+            if(c == grid_size*grid_sizey):
                 twist_msg = Twist()
                 twist_msg.linear.x = 0
                 twist_msg.angular.z = 0

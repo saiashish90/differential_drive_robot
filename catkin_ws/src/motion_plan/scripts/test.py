@@ -13,9 +13,9 @@ grid_size = 10
 
 #explore grid size
 explore = []
-for i in range(grid_size-1):
+for i in range(grid_size):
     temp = []
-    for j in range(grid_size-1):
+    for j in range(20):
         temp.append(0)
     explore.append(temp)
 for i in range(len(explore)):
