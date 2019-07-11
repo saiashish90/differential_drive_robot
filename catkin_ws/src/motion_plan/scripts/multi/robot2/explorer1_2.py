@@ -146,8 +146,6 @@ def main():
                 #change_state(0)
 
             if regions_['front'] > 2 and regions_['fright'] > 2 and regions_['fleft'] > 2 and regions_['right'] > 2 and regions_['left'] > 2:
-                for i in range(100000):
-                    continue
                 change_state(0)
 
         rate.sleep()
