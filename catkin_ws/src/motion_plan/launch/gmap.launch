@@ -1,5 +1,5 @@
 <launch>
-  <arg name="scan_topic"  default="/m2wr/laser/scan" />
+  <arg name="scan_topic"  default="/laser_scan" />
   <arg name="base_frame"  default="link_chassis"/>
   <arg name="odom_frame"  default="odom"/>
 

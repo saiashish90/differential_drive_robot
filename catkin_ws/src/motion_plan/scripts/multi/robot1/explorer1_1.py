@@ -116,7 +116,7 @@ def main():
             continue
 
         if state_ == 0:
-            if regions_['front'] > 0.2 and regions_['front'] < .7:
+            if regions_['front'] > 0 and regions_['front'] < 1:
                 change_state(1)
 
         elif state_ == 1:
@@ -145,7 +145,7 @@ def main():
                 #print 'between 30 and 90 - to the right'
                 #change_state(0)
 
-            if regions_['front'] > 1.5 and regions_['fright'] > 1.5 and regions_['fleft'] > 1.5:
+            if regions_['front'] > 2 and regions_['fright'] > 2 and regions_['fleft'] > 2 and regions_['right'] > .4 and regions_['left'] > .4:
                 change_state(0)
 
         rate.sleep()

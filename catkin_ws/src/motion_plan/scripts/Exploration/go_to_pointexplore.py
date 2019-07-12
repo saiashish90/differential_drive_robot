@@ -10,10 +10,15 @@ import math
 import random
 
 #range_
-range_ = 1
-
+range_ = 5
+grid_size = 10
 #explore grid size
-explore = [[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]]
+explore = []
+for i in range(grid_size):
+    temp = []
+    for j in range(grid_size):
+        temp.append(0)
+    explore.append(temp)
 
 active_ = False
 
@@ -76,9 +81,9 @@ def find_borders(des_position_):
     point.z = 0
 
     #point1
-    point.x =des_position_.x-1
+    point.x =des_position_.x-range_
     point.y =des_position_.y
-    if((point.x>=0 and point.y>=0)and (point.x<=4 and point.y<=4)):
+    if((point.x>=0 and point.y>=0)and (point.x<=grid_size-1 and point.y<=grid_size-1)):
         borders[0].x = point.x
         borders[0].y = point.y
     else:
@@ -87,8 +92,8 @@ def find_borders(des_position_):
 
     #point2
     point.x =des_position_.x
-    point.y =des_position_.y+1
-    if((point.x>=0 and point.y>=0) and (point.x<=4 and point.y<=4)):
+    point.y =des_position_.y+range_
+    if((point.x>=0 and point.y>=0)and (point.x<=grid_size-1 and point.y<=grid_size-1)):
         borders[1].x = point.x
         borders[1].y = point.y
 
@@ -97,9 +102,9 @@ def find_borders(des_position_):
         borders[1].y = -1
 
     #point3
-    point.x =des_position_.x+1
+    point.x =des_position_.x+range_
     point.y =des_position_.y
-    if((point.x>=0 and point.y>=0)and (point.x<=4 and point.y<=4)):
+    if((point.x>=0 and point.y>=0)and (point.x<=grid_size-1 and point.y<=grid_size-1)):
         borders[2].x = point.x
         borders[2].y = point.y
     else:
@@ -108,8 +113,8 @@ def find_borders(des_position_):
 
     #point4
     point.x =des_position_.x
-    point.y =des_position_.y-1
-    if((point.x>=0 and point.y>=0)and (point.x<=4 and point.y<=4)):
+    point.y =des_position_.y-range_
+    if((point.x>=0 and point.y>=0)and (point.x<=grid_size-1 and point.y<=grid_size-1)):
         borders[3].x = point.x
         borders[3].y = point.y
     else:
@@ -123,6 +128,9 @@ def find_borders(des_position_):
 def pick_random_point():
     global borders, des_position_, explore
     flag = 0
+    curr_point = Point()
+    curr_point.x = desired_position_.x
+    curr_point.y = desired_position_.y
     while(flag != -1):
         a = random.choice([0,1,2,3])
         if((borders[a].x>=0 and borders[a].y>=0) and explore[borders[a].x][borders[a].y] == 0):
@@ -141,21 +149,25 @@ def pick_random_point():
             flag = -1
 
     #print desired_position_
-    for i in range(len(borders)):
-        if(borders[i].x>=0 and borders[i].y>=0):
-            set_point_one(borders[i])
-    #for i in range(len(explore)):
-        #for j in range(len(explore[i])):
-            #print(explore[i][j]),
-        #print
-
-def set_point_one(point):
-    global explore
-    explore[point.x][point.y] = 1
+    set_all_points_one(curr_point)
     for i in range(len(explore)):
         for j in range(len(explore[i])):
             print(explore[i][j]),
         print
+
+def set_point_one(point):
+    global explore
+    explore[point.x][point.y] = 1
+
+def set_all_points_one(curr_point):
+    global explore, range_
+    for i in range(curr_point.x-range_,curr_point.x+range_):
+        for j in range(curr_point.y-range_,curr_point.y+range_):
+            if(((i-curr_point.x)*(i-curr_point.x) + (j-curr_point.y)*(j-curr_point.y) <= range_*range_) and (i<=grid_size-1 and i>=0 and j<=grid_size-1 and j>=0)):
+                explore[i][j] = 1
+            else:
+                continue
+
 
 
 def change_state(state):
@@ -173,7 +185,7 @@ def fix_yaw(des_pos):
     desired_yaw = math.atan2(des_pos.y - position_.y, des_pos.x - position_.x)
     err_yaw = normalize_angle(desired_yaw - yaw_)
 
-    rospy.loginfo(err_yaw)
+    #rospy.loginfo(err_yaw)
 
     twist_msg = Twist()
     if math.fabs(err_yaw) > yaw_precision_:
@@ -183,7 +195,7 @@ def fix_yaw(des_pos):
 
     # state change conditions
     if math.fabs(err_yaw) <= yaw_precision_:
-        print 'Yaw error: [%s]' % err_yaw
+        #print 'Yaw error: [%s]' % err_yaw
         change_state(1)
 
 
@@ -199,12 +211,12 @@ def go_straight_ahead(des_pos):
         twist_msg.angular.z = 0.1 if err_yaw > 0 else -0.1
         pub.publish(twist_msg)
     else:
-        print 'Position error: [%s]' % err_pos
+        #print 'Position error: [%s]' % err_pos
         change_state(2)
 
     # state change conditions
     if math.fabs(err_yaw) > yaw_precision_:
-        print 'Yaw error: [%s]' % err_yaw
+        #print 'Yaw error: [%s]' % err_yaw
         change_state(0)
 
 def done_point():
@@ -213,10 +225,17 @@ def done_point():
     twist_msg.linear.x = 0
     twist_msg.angular.z = 0
     pub.publish(twist_msg)
-    find_borders(desired_position_)
+    do_a_spin()
     set_point_one(desired_position_)
+    find_borders(desired_position_)
     pick_random_point()
     change_state(0)
+
+def do_a_spin():
+    for i in range(200000):
+        twist_msg = Twist()
+        twist_msg.angular.z = 1
+        pub.publish(twist_msg)
 
 def main():
     global pub, active_
@@ -248,7 +267,7 @@ def main():
                 for j in range(len(explore[i])):
                     if(explore[i][j] == 1):
                         c = c + 1
-            if(c == 25):
+            if(c == grid_size**2):
                 twist_msg = Twist()
                 twist_msg.linear.x = 0
                 twist_msg.angular.z = 0
