@@ -91,12 +91,12 @@ def main():
     sub_odom = rospy.Subscriber('/robot1/odom', Odometry, clbk_odom)
     #pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
 
-    rospy.wait_for_service('/go_to_point_switch')
-    rospy.wait_for_service('/wall_follower_switch')
+    rospy.wait_for_service('/go_to_point_switch1')
+    rospy.wait_for_service('/wall_follower_switch1')
     rospy.wait_for_service('/gazebo/set_model_state')
 
-    srv_client_go_to_point_ = rospy.ServiceProxy('/go_to_point_switch', SetBool)
-    srv_client_wall_follower_ = rospy.ServiceProxy('/wall_follower_switch', SetBool)
+    srv_client_go_to_point_ = rospy.ServiceProxy('/go_to_point_switch1', SetBool)
+    srv_client_wall_follower_ = rospy.ServiceProxy('/wall_follower_switch1', SetBool)
     srv_client_set_model_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
 
     # set robot position
@@ -116,7 +116,7 @@ def main():
             continue
 
         if state_ == 0:
-            if regions_['front'] > 0 and regions_['front'] < 1:
+            if regions_['front'] < 1 and regions_['fright'] <1 and regions_['fleft'] < 1 and regions_['right'] < 1 and regions_['left'] < 1:
                 change_state(1)
 
         elif state_ == 1:

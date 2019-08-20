@@ -2,6 +2,7 @@
 
 import rospy
 from sensor_msgs.msg import LaserScan
+from std_msgs.msg import String,Int32,Int32MultiArray,MultiArrayLayout,MultiArrayDimension
 from geometry_msgs.msg import Twist, Point
 from nav_msgs.msg import Odometry
 from tf import transformations
@@ -26,6 +27,7 @@ active_ = False
 
 # robot state variables
 position_ = Point()
+curr_point = Point()
 yaw_ = 0
 # machine state
 state_ = 0
@@ -34,7 +36,8 @@ desired_position_ = Point()
 desired_position_.x = rospy.get_param('des_pos_x')
 desired_position_.y = rospy.get_param('des_pos_y')
 desired_position_.z = 0
-
+curr_point.x = desired_position_.x
+curr_point.y = desired_position_.y
 prev = Point()
 
 borders = []
@@ -46,20 +49,20 @@ borders.append(Point())
 
 # parameters
 yaw_precision_ = math.pi / 90 # +/- 2 degree allowed
-dist_precision_ = 3
+dist_precision_ = 5
 
 # publishers
 pub = None
 
+arrpub = None
 # service callbacks
-def go_to_point_switch(req):
+def go_to_point_switch1(req):
     global active_
     active_ = req.data
     res = SetBoolResponse()
     res.success = True
     res.message = 'Done!'
     return res
-
 # callbacks
 def clbk_odom(msg):
     global position_
@@ -126,6 +129,7 @@ def find_borders(des_position_):
     #for i in range(0,len(borders)):
         #print (borders[i].x),
         #print (borders[i].y)
+
 def utility_calc(des_position_):
     point = Point()
     u = 0
@@ -155,8 +159,7 @@ def find_max(util):
     return max
 
 def pick_random_point():
-    global borders, des_position_, explore
-    curr_point = Point()
+    global borders, des_position_, explore,curr_point
     curr_point.x = desired_position_.x
     curr_point.y = desired_position_.y
     flag = 0
@@ -255,7 +258,6 @@ def fix_yaw(des_pos):
         #print 'Yaw error: [%s]' % err_yaw
         change_state(1)
 
-
 def go_straight_ahead(des_pos):
     global yaw_, pub, yaw_precision_, state_
     desired_yaw = math.atan2(des_pos.y - position_.y, des_pos.x - position_.x)
@@ -282,10 +284,12 @@ def done_point():
     twist_msg.linear.x = 0
     twist_msg.angular.z = 0
     pub.publish(twist_msg)
-    do_a_spin()
+    #do_a_spin()
     set_point_one(desired_position_)
+    publish_array()
     find_borders(desired_position_)
     pick_random_point()
+
     change_state(0)
 
 def do_a_spin():
@@ -294,17 +298,47 @@ def do_a_spin():
         twist_msg.angular.z = 1
         pub.publish(twist_msg)
 
+def publish_array():
+    global explore,arrpub,borders
+    points = []
+    for i in range(curr_point.x-range_,curr_point.x+range_):
+        for j in range(curr_point.y-range_,curr_point.y+range_):
+            if(((i-curr_point.x)*(i-curr_point.x) + (j-curr_point.y)*(j-curr_point.y) <= range_*range_) and (i<=grid_size-1 and i>=0 and j<=grid_sizey-1 and j>=0)):
+                points.append(i)
+                points.append(j)
+            else:
+                continue
+    a = Int32MultiArray()
+    a.data = points
+    arrpub.publish(a)
+
+def clbk_array(msg):
+    global explore
+    c = 0
+    points = msg.data
+    for i in range(len(points)/2):
+        print points[c],
+        print points[c+1]
+        explore[points[c]][points[c+1]] = 1
+        print explore[points[c]][points[c+1]]
+        c = c+2
+
 def main():
-    global pub, active_
+    global pub, active_,arrpub
     c = 0
 
     rospy.init_node('go_to_point_1')
 
     pub = rospy.Publisher('/robot1/cmd_vel', Twist, queue_size=1)
 
+    arrpub = rospy.Publisher('/robot1/array',Int32MultiArray,queue_size = 100)
+
+    arrsub2 = rospy.Subscriber('/robot2/array',Int32MultiArray,clbk_array)
+    arrsub3 = rospy.Subscriber('/robot3/array',Int32MultiArray,clbk_array)
+
     sub_odom = rospy.Subscriber('/robot1/odom', Odometry, clbk_odom)
 
-    srv = rospy.Service('go_to_point_switch', SetBool, go_to_point_switch)
+    srv = rospy.Service('go_to_point_switch1', SetBool, go_to_point_switch1)
 
     rate = rospy.Rate(20)
     while not rospy.is_shutdown():

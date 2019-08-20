@@ -11,9 +11,11 @@ import math
 import random
 
 #range_
-range_ = 5
-grid_size = 10
-grid_sizey = 20
+range_ = 2
+grid_size = 11
+grid_sizey = 11
+ia = 0
+ja = 0
 
 #explore grid size
 explore = []
@@ -24,6 +26,37 @@ for i in range(grid_size):
     explore.append(temp)
 
 active_ = False
+
+circle = []
+for i in range(int(math.ceil(float(grid_size)/(2*range_)))):
+    temp = []
+    for j in range(int(math.ceil(float(grid_size)/(2*range_)))):
+        a = Point()
+        temp.append(a)
+    circle.append(temp)
+
+circle[0][0].x = 1
+circle[0][0].y = 2
+for i in range(len(circle)):
+    for j in range(len(circle[i])):
+        if i == 0 and j == 0:
+            circle[i][j].x = 0
+            circle[i][j].y = 0
+        elif i%2 == 0:
+            if j == 0:
+                circle[i][j].x = 0
+                circle[i][j].y = 2*i*range_
+            else:
+                circle[i][j].x = circle[i][j-1].x+2*range_
+                circle[i][j].y = 2*i*range_
+        else:
+            if j == 0:
+                circle[i][j].x = 0+range_
+                circle[i][j].y = 2*i*range_
+            else:
+                circle[i][j].x = circle[i][j-1].x+2*range_
+                circle[i][j].y = 2*i*range_
+
 
 # robot state variables
 position_ = Point()
@@ -49,14 +82,14 @@ borders.append(Point())
 
 # parameters
 yaw_precision_ = math.pi / 90 # +/- 2 degree allowed
-dist_precision_ = 5
+dist_precision_ = .3
 
 # publishers
 pub = None
 
 arrpub = None
 # service callbacks
-def go_to_point_switch2(req):
+def go_to_point_switch(req):
     global active_
     active_ = req.data
     res = SetBoolResponse()
@@ -80,14 +113,16 @@ def clbk_odom(msg):
     euler = transformations.euler_from_quaternion(quaternion)
     yaw_ = euler[2]
 
-def find_borders(des_position_):
-    global explore, borders, desired_position_, range_
+def find_borders():
+    global explore, borders, desired_position_, range_,ia,ja
+    print "ia: ja:",
+    print  ia,ja
     point = Point()
     point.z = 0
 
     #point1
-    point.x =des_position_.x-range_
-    point.y =des_position_.y
+    point.x =ja-1
+    point.y =ia
     if((point.x>=0 and point.y>=0)and (point.x<=grid_size-1 and point.y<=grid_sizey-1)):
         borders[0].x = point.x
         borders[0].y = point.y
@@ -96,8 +131,8 @@ def find_borders(des_position_):
         borders[0].y = -1
 
     #point2
-    point.x =des_position_.x
-    point.y =des_position_.y+range_
+    point.x =ja
+    point.y =ia+1
     if((point.x>=0 and point.y>=0)and (point.x<=grid_size-1 and point.y<=grid_sizey-1)):
         borders[1].x = point.x
         borders[1].y = point.y
@@ -107,8 +142,8 @@ def find_borders(des_position_):
         borders[1].y = -1
 
     #point3
-    point.x =des_position_.x+range_
-    point.y =des_position_.y
+    point.x =ja+1
+    point.y =ia
     if((point.x>=0 and point.y>=0)and (point.x<=grid_size-1 and point.y<=grid_sizey-1)):
         borders[2].x = point.x
         borders[2].y = point.y
@@ -117,8 +152,8 @@ def find_borders(des_position_):
         borders[2].y = -1
 
     #point4
-    point.x =des_position_.x
-    point.y =des_position_.y-range_
+    point.x =ja
+    point.y =ia - 1
     if((point.x>=0 and point.y>=0)and (point.x<=grid_size-1 and point.y<=grid_sizey-1)):
         borders[3].x = point.x
         borders[3].y = point.y
@@ -133,21 +168,26 @@ def find_borders(des_position_):
 def utility_calc(des_position_):
     point = Point()
     u = 0
-    point.x =des_position_.x-range_
+    point.x =des_position_.x-1
     point.y =des_position_.y
-    if((point.x>=0 and point.y>=0) and (point.x<=grid_size-1 and point.y<=grid_sizey-1) and explore[point.x][point.y] == 0 ):
+    print  ("point:%s",point)
+    if((point.x>=0 and point.y>=0) and (point.x<int(math.ceil(float(grid_size)/(2*range_))) and point.y<int(math.ceil(float(grid_size)/(2*range_)))) and explore[circle[point.x][point.y].x][circle[point.x][point.y].y] == 0 ):
         u= u+1
     point.x =des_position_.x
-    point.y =des_position_.y+range_
-    if((point.x>=0 and point.y>=0) and (point.x<=grid_size-1 and point.y<=grid_sizey-1) and explore[point.x][point.y] == 0 ):
+    point.y =des_position_.y+1
+    print  point
+
+    if((point.x>=0 and point.y>=0) and (point.x<int(math.ceil(float(grid_size)/(2*range_))) and point.y<int(math.ceil(float(grid_size)/(2*range_)))) and explore[circle[point.x][point.y].x][circle[point.x][point.y].y] == 0 ):
         u= u+1
-    point.x =des_position_.x+range_
+    point.x =des_position_.x+1
     point.y =des_position_.y
-    if((point.x>=0 and point.y>=0) and (point.x<=grid_size-1 and point.y<=grid_sizey-1) and explore[point.x][point.y] == 0 ):
+    print  point
+    if((point.x>=0 and point.y>=0) and (point.x<int(math.ceil(float(grid_size)/(2*range_))) and point.y<int(math.ceil(float(grid_size)/(2*range_)))) and explore[circle[point.x][point.y].x][circle[point.x][point.y].y] == 0 ):
         u= u+1
     point.x =des_position_.x
-    point.y =des_position_.y-range_
-    if((point.x>=0 and point.y>=0) and (point.x<=grid_size-1 and point.y<=grid_sizey-1) and explore[point.x][point.y] == 0 ):
+    point.y =des_position_.y-1
+    print  point
+    if((point.x>=0 and point.y>=0) and (point.x<int(math.ceil(float(grid_size)/(2*range_))) and point.y<int(math.ceil(float(grid_size)/(2*range_)))) and explore[circle[point.x][point.y].x][circle[point.x][point.y].y] == 0 ):
         u= u+1
     return u
 
@@ -159,7 +199,7 @@ def find_max(util):
     return max
 
 def pick_random_point():
-    global borders, des_position_, explore,curr_point
+    global borders, des_position_, explore,curr_point, circle,ia,ja
     curr_point.x = desired_position_.x
     curr_point.y = desired_position_.y
     flag = 0
@@ -168,8 +208,9 @@ def pick_random_point():
     pos = -1
     for i in range(len(borders)):
         utility.append(utility_calc(borders[i]))
-        if(borders[i].x == -1 ):
-            utility[i] = -1
+        if borders[i].x <3 and borders[i].y<3:
+            if(explore[circle[borders[i].x][borders[i].y].x][circle[borders[i].x][borders[i].y].y] == 1):
+                utility[i] = -1
 
     print utility
     while(flag != -1):
@@ -181,8 +222,10 @@ def pick_random_point():
 
         max = find_max(utility)
         if(utility[max] > 0):
-            desired_position_.x = borders[max].x
-            desired_position_.y = borders[max].y
+            desired_position_.x = circle[borders[max].x][borders[max].y].x
+            desired_position_.y = circle[borders[max].x][borders[max].y].y
+            ia = borders[max].y
+            ja = borders[max].x
             flag = -1
         else:
             for i in range(len(explore)):
@@ -287,7 +330,7 @@ def done_point():
     #do_a_spin()
     set_point_one(desired_position_)
     publish_array()
-    find_borders(desired_position_)
+    find_borders()
     pick_random_point()
 
     change_state(0)
@@ -327,18 +370,17 @@ def main():
     global pub, active_,arrpub
     c = 0
 
-    rospy.init_node('go_to_point_2')
+    rospy.init_node('go_to_point_1')
 
-    pub = rospy.Publisher('/robot2/cmd_vel', Twist, queue_size=1)
+    pub = rospy.Publisher('/robot1/cmd_vel', Twist, queue_size=1)
 
-    arrpub = rospy.Publisher('/robot2/array',Int32MultiArray,queue_size = 100)
+    arrpub = rospy.Publisher('/robot1/array',Int32MultiArray,queue_size = 100)
 
-    arrsub2 = rospy.Subscriber('/robot1/array',Int32MultiArray,clbk_array)
-    arrsub3 = rospy.Subscriber('/robot3/array',Int32MultiArray,clbk_array)
+    arrsub = rospy.Subscriber('/robot2/array',Int32MultiArray,clbk_array)
 
-    sub_odom = rospy.Subscriber('/robot2/odom', Odometry, clbk_odom)
+    sub_odom = rospy.Subscriber('/robot1/odom', Odometry, clbk_odom)
 
-    srv = rospy.Service('go_to_point_switch2', SetBool, go_to_point_switch2)
+    srv = rospy.Service('go_to_point_switch', SetBool, go_to_point_switch)
 
     rate = rospy.Rate(20)
     while not rospy.is_shutdown():

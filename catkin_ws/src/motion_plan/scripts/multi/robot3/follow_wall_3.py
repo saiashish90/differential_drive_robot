@@ -27,7 +27,7 @@ state_dict_ = {
     3: 'turn right'
 }
 
-def wall_follower_switch1(req):
+def wall_follower_switch3(req):
     global active_
     active_ = req.data
     res = SetBoolResponse()
@@ -118,13 +118,13 @@ def follow_the_wall():
 def main():
     global pub_, active_
 
-    rospy.init_node('reading_laser_1')
+    rospy.init_node('reading_laser_3')
 
-    pub_ = rospy.Publisher('/robot1/cmd_vel', Twist, queue_size=1)
+    pub_ = rospy.Publisher('/robot3/cmd_vel', Twist, queue_size=1)
 
-    sub = rospy.Subscriber('/robot1/laser_scan', LaserScan, clbk_laser)
+    sub = rospy.Subscriber('/robot3/laser_scan', LaserScan, clbk_laser)
 
-    srv = rospy.Service('wall_follower_switch1', SetBool, wall_follower_switch1)
+    srv = rospy.Service('wall_follower_switch3', SetBool, wall_follower_switch3)
 
     rate = rospy.Rate(20)
     while not rospy.is_shutdown():

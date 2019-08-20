@@ -49,14 +49,14 @@ borders.append(Point())
 
 # parameters
 yaw_precision_ = math.pi / 90 # +/- 2 degree allowed
-dist_precision_ = 5
+dist_precision_ = 3
 
 # publishers
 pub = None
 
 arrpub = None
 # service callbacks
-def go_to_point_switch2(req):
+def go_to_point_switch3(req):
     global active_
     active_ = req.data
     res = SetBoolResponse()
@@ -327,18 +327,18 @@ def main():
     global pub, active_,arrpub
     c = 0
 
-    rospy.init_node('go_to_point_2')
+    rospy.init_node('go_to_point_3')
 
-    pub = rospy.Publisher('/robot2/cmd_vel', Twist, queue_size=1)
+    pub = rospy.Publisher('/robot3/cmd_vel', Twist, queue_size=1)
 
-    arrpub = rospy.Publisher('/robot2/array',Int32MultiArray,queue_size = 100)
+    arrpub = rospy.Publisher('/robot3/array',Int32MultiArray,queue_size = 100)
 
-    arrsub2 = rospy.Subscriber('/robot1/array',Int32MultiArray,clbk_array)
-    arrsub3 = rospy.Subscriber('/robot3/array',Int32MultiArray,clbk_array)
+    arrsub1 = rospy.Subscriber('/robot1/array',Int32MultiArray,clbk_array)
+    arrsub2 = rospy.Subscriber('/robot2/array',Int32MultiArray,clbk_array)
 
-    sub_odom = rospy.Subscriber('/robot2/odom', Odometry, clbk_odom)
+    sub_odom = rospy.Subscriber('/robot3/odom', Odometry, clbk_odom)
 
-    srv = rospy.Service('go_to_point_switch2', SetBool, go_to_point_switch2)
+    srv = rospy.Service('go_to_point_switch3', SetBool, go_to_point_switch3)
 
     rate = rospy.Rate(20)
     while not rospy.is_shutdown():

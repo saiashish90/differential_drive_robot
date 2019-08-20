@@ -87,21 +87,21 @@ def main():
 
     rospy.init_node('explorer1')
 
-    sub_laser = rospy.Subscriber('/robot2/laser_scan', LaserScan, clbk_laser)
-    sub_odom = rospy.Subscriber('/robot2/odom', Odometry, clbk_odom)
+    sub_laser = rospy.Subscriber('/robot1/laser_scan', LaserScan, clbk_laser)
+    sub_odom = rospy.Subscriber('/robot1/odom', Odometry, clbk_odom)
     #pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
 
-    rospy.wait_for_service('/go_to_point_switch2')
-    rospy.wait_for_service('/wall_follower_switch2')
+    rospy.wait_for_service('/go_to_point_switch')
+    rospy.wait_for_service('/wall_follower_switch')
     rospy.wait_for_service('/gazebo/set_model_state')
 
-    srv_client_go_to_point_ = rospy.ServiceProxy('/go_to_point_switch2', SetBool)
-    srv_client_wall_follower_ = rospy.ServiceProxy('/wall_follower_switch2', SetBool)
+    srv_client_go_to_point_ = rospy.ServiceProxy('/go_to_point_switch', SetBool)
+    srv_client_wall_follower_ = rospy.ServiceProxy('/wall_follower_switch', SetBool)
     srv_client_set_model_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
 
     # set robot position
     model_state = ModelState()
-    model_state.model_name = 'robot2'
+    model_state.model_name = 'robot1'
     model_state.pose.position.x = initial_position_.x
     model_state.pose.position.y = initial_position_.y
     resp = srv_client_set_model_state(model_state)
@@ -116,7 +116,7 @@ def main():
             continue
 
         if state_ == 0:
-            if regions_['front'] < 1 and regions_['fright'] <1 and regions_['fleft'] < 1 and regions_['right'] < 1 and regions_['left'] < 1:
+            if regions_['front'] > 0.15 and regions_['front'] < 1:
                 change_state(1)
 
         elif state_ == 1:
