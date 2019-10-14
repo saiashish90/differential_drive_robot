@@ -44,9 +44,9 @@ for i in range(len(circle)):
                 circle[i][j].y = 2*i*range_
 
 explore = []
-for i in range(circle):
+for i in range(len(circle)):
     temp = []
-    for j in range(circle[i]):
+    for j in range(len(circle[i])):
         temp.append(0)
     explore.append(temp)
 
