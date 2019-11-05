@@ -76,7 +76,7 @@ borders.append(Point())
 
 # parameters
 yaw_precision_ = math.pi / 90 # +/- 2 degree allowed
-dist_precision_ = 5
+dist_precision_ = 1
 
 # publishers
 pub = None
@@ -159,21 +159,54 @@ def find_borders(des_position_):
 
 def utility_calc(des_position_):
     point = Point()
+    poin = Point()
     u = 0
-    point.x =des_position_.x-1
-    point.y =des_position_.y
+    poin.x =des_position_.x-1
+    poin.y =des_position_.y
+
+    for i in range(len(circle)):
+        for j in range(len(circle[i])):
+            if(circle[i][j].x == poin.x and circle[i][j].y == poin.y):
+                point.x = (circle[i][j].x)
+                point.y = (circle[i][j].y)
+    point.x = ((int)(point.x))
+    point.y = ((int)(point.y))
+
     if((point.x>=0 and point.y>=0) and (point.x<=grid_size-1 and point.y<=grid_sizey-1) and explore[point.x][point.y] == 0 ):
         u= u+1
-    point.x =des_position_.x
-    point.y =des_position_.y+1
+
+    poin.x =des_position_.x
+    poin.y =des_position_.y+1
+    for i in range(len(circle)):
+        for j in range(len(circle[i])):
+            if(circle[i][j].x == poin.x and circle[i][j].y == poin.y):
+                point.x = (circle[i][j].x)
+                point.y = (circle[i][j].y)
+    point.x = ((int)(point.x))
+    point.y = ((int)(point.y))
+
     if((point.x>=0 and point.y>=0) and (point.x<=grid_size-1 and point.y<=grid_sizey-1) and explore[point.x][point.y] == 0 ):
         u= u+1
-    point.x =des_position_.x+1
-    point.y =des_position_.y
+    poin.x =des_position_.x+1
+    poin.y =des_position_.y
+    for i in range(len(circle)):
+        for j in range(len(circle[i])):
+            if(circle[i][j].x == poin.x and circle[i][j].y == poin.y):
+                point.x = (circle[i][j].x)
+                point.y = (circle[i][j].y)
+    point.x = ((int)(point.x))
+    point.y = ((int)(point.y))
     if((point.x>=0 and point.y>=0) and (point.x<=grid_size-1 and point.y<=grid_sizey-1) and explore[point.x][point.y] == 0 ):
         u= u+1
-    point.x =des_position_.x
-    point.y =des_position_.y-1
+    poin.x =des_position_.x
+    poin.y =des_position_.y-1
+    for i in range(len(circle)):
+        for j in range(len(circle[i])):
+            if(circle[i][j].x == poin.x and circle[i][j].y == poin.y):
+                point.x = (circle[i][j].x)
+                point.y = (circle[i][j].y)
+    point.x = ((int)(point.x))
+    point.y = ((int)(point.y))
     if((point.x>=0 and point.y>=0) and (point.x<=grid_size-1 and point.y<=grid_sizey-1) and explore[point.x][point.y] == 0 ):
         u= u+1
     return u

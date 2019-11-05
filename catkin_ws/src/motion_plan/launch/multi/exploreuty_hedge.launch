@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch>
+    <arg name="initial_x" default="0" />
+    <arg name="initial_y" default="0" />
+    <arg name="des_x" default="0" />
+    <arg name="des_y" default="0" />
+    <param name="initial_x" value="$(arg initial_x)" />
+    <param name="initial_y" value="$(arg initial_y)" />
+    <param name="des_pos_x" value="$(arg des_x)" />
+    <param name="des_pos_y" value="$(arg des_y)" />
+    <node pkg="motion_plan" type="follow_wall_1.py" name="wall_follower_1" />
+    <node pkg="motion_plan" type="hedgee.py" name="go_to_point_1" output="screen"/>
+    <node pkg="motion_plan" type="explorer1_1.py" name="explorer1_1" output="screen" />
+</launch>
